@@ -8,14 +8,17 @@ pipeline {
             }
         }
 
-        stage('Build & Push Docker Image') {
+        stage('Build Docker Image') {
             steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                        def customImage = docker.build("ubaidqureshi92/flask-devops-app:${BUILD_NUMBER}")
-                        customImage.push()
-                        customImage.push('latest')
-                    }
+                bat 'docker build -t ubaidqureshi92/flask-devops-app:latest .'
+            }
+        }
+
+        stage('Login & Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
+                    bat 'docker push ubaidqureshi92/flask-devops-app:latest'
                 }
             }
         }
