@@ -1,27 +1,43 @@
-[ Developer Local Machine ]
-│
-│  1. git push origin main
-▼
-[ GitHub Repository ] ──── (SCM Trigger) ────► [ Jenkins Pipeline Container ]
-│
-├── 2. Checkout Code
-├── 3. Environment Check
-├── 4. Install Dependencies
-├── 5. Run Unit Tests
-├── 6. Build Docker Image
-│
-│  7. Authenticate & Push
-▼
-[ Docker Hub Registry ]
-│
-│  8. Pull Image & Apply Manifests
-▼
-[ Kubernetes Cluster ]
-(Deployment & Service)
-│
-│  9. Expose via NodePort (30007)
-▼
-[ End-User Application ]
+┌──────────────────────────┐
+│ Developer Local Machine  │
+└────────────┬─────────────┘
+             │
+             │ 1. git push origin main
+             ▼
+┌──────────────────────────┐
+│    GitHub Repository     │
+└────────────┬─────────────┘
+             │
+             │ SCM Trigger
+             ▼
+┌─────────────────────────────────────────────────────────┐
+│               Jenkins Pipeline Container                │
+│                                                         │
+│  ├── 2. Checkout SCM                                    │
+│  ├── 3. Check Environment                               │
+│  ├── 4. Setup Dependencies                              │
+│  ├── 5. Run Unit Tests                                  │
+│  └── 6. Build Docker Image                              │
+└────────────┬────────────────────────────────────────────┘
+             │
+             │ 7. Authenticate & Push Image
+             ▼
+┌──────────────────────────┐
+│   Docker Hub Registry    │
+└────────────┬─────────────┘
+             │
+             │ 8. Pull Image & Apply Manifests
+             ▼
+┌──────────────────────────┐
+│    Kubernetes Cluster    │
+│  (Deployment & Service)  │
+└────────────┬─────────────┘
+             │
+             │ 9. Expose via NodePort (30007)
+             ▼
+┌──────────────────────────┐
+│   End-User Application   │
+└──────────────────────────┘
 # Complete CI/CD Pipeline for Flask Web Application
 
 This repository contains an end-to-end automated Continuous Integration and Continuous Deployment (CI/CD) pipeline built with **Flask**, **Jenkins**, **Docker**, **Docker Hub**, and **Kubernetes**.
