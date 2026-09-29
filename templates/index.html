@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Monitoring Dashboard</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 30px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .card { background-color: #1e293b; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); border: 1px solid #334155; }
+        .card h3 { margin-top: 0; color: #94a3b8; font-size: 14px; text-transform: uppercase; }
+        .metric-value { font-size: 32px; font-weight: bold; color: #38bdf8; margin: 10px 0; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; background-color: #166534; color: #4ade80; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Live DevOps System Dashboard</h1>
+            <span class="status-badge" id="conn-status">Connecting...</span>
+        </div>
+
+        <div class="card-grid">
+            <div class="card">
+                <h3>CPU Utilization</h3>
+                <div class="metric-value" id="cpu-val">0%</div>
+            </div>
+            <div class="card">
+                <h3>Memory Usage</h3>
+                <div class="metric-value" id="mem-val">0%</div>
+            </div>
+            <div class="card">
+                <h3>Active Pods</h3>
+                <div class="metric-value" id="pods-val">0</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+
+        socket.on('connect', () => {
+            document.getElementById('conn-status').innerText = 'System Live & Connected';
+        });
+
+        socket.on('system_metrics', (data) => {
+            document.getElementById('cpu-val').innerText = data.cpu + '%';
+            document.getElementById('mem-val').innerText = data.memory + '%';
+            document.getElementById('pods-val').innerText = data.active_pods;
+        });
+    </script>
+</body>
+</html>
