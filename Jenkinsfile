@@ -17,31 +17,31 @@ pipeline {
         stage('Check Environment') {
             steps {
                 echo 'Checking local system tools...'
-                bat 'python --version'
-                bat 'docker --version'
-                bat 'kubectl version --client'
+                sh 'python3 --version || python --version'
+                sh 'docker --version'
+                sh 'kubectl version --client'
             }
         }
 
         stage('Setup') {
             steps {
                 echo 'Installing python dependencies...'
-                bat 'python -m pip install --upgrade pip'
-                bat 'pip install -r requirements.txt'
+                sh 'python3 -m pip install --upgrade pip || python -m pip install --upgrade pip'
+                sh 'pip install -r requirements.txt || pip3 install -r requirements.txt'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running unit tests and app validation...'
-                bat 'python -c "import app; print(\'Flask application unit test passed successfully!\')"'
+                sh 'python3 -c "import app; print(\'Flask application unit test passed successfully!\')" || python -c "import app; print(\'Flask application unit test passed successfully!\')"'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker container image...'
-                bat "docker build -t ${DOCKER_HUB_REPO}:${IMAGE_TAG} ."
+                sh "docker build -t ${DOCKER_HUB_REPO}:${IMAGE_TAG} ."
             }
         }
 
@@ -49,7 +49,7 @@ pipeline {
             steps {
                 echo 'Authenticating with Docker Hub...'
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                 }
             }
         }
@@ -57,18 +57,18 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 echo 'Pushing image to Docker Hub...'
-                bat "docker push ${DOCKER_HUB_REPO}:${IMAGE_TAG}"
+                sh "docker push ${DOCKER_HUB_REPO}:${IMAGE_TAG}"
             }
         }
 
         stage('Post Actions') {
             steps {
                 echo 'Applying Kubernetes Deployment & Service Manifests...'
-                bat 'kubectl apply -f deployment.yaml'
-                bat 'kubectl apply -f service.yaml'
-                bat 'kubectl rollout restart deployment/flask-app-deployment'
-                bat 'kubectl get pods'
-                bat 'kubectl get svc'
+                sh 'kubectl apply -f deployment.yaml'
+                sh 'kubectl apply -f service.yaml'
+                sh 'kubectl rollout restart deployment/flask-app-deployment'
+                sh 'kubectl get pods'
+                sh 'kubectl get svc'
             }
         }
     }
