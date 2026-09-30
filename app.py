@@ -11,7 +11,6 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 def generate_live_metrics():
     while True:
         time.sleep(2)
-        # Realtime metrics emit ho rahe hain
         socketio.emit('system_metrics', {
             'cpu': round(random.uniform(15.0, 65.0), 1),
             'memory': round(random.uniform(40.0, 80.0), 1),
