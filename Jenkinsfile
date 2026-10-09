@@ -72,7 +72,9 @@ pipeline {
             steps {
                 echo 'Updating Minikube cluster deployment...'
                 bat '''
-                    set PATH=C:\\Users\\Dell\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;C:\\ProgramData\\chocolatey\\bin;%PATH%
+                    set PATH=C:\\Windows\\System32;C:\\Users\\Dell\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%
+                    set KUBECONFIG=C:\\Users\\Dell\\.kube\\config
+
                     minikube image load %DOCKER_HUB_REPO%:%IMAGE_TAG%
                     kubectl apply -f deployment.yaml
                     kubectl apply -f service.yaml
