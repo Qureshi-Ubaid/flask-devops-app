@@ -16,55 +16,49 @@ pipeline {
 
         stage('Check Environment') {
             steps {
-                echo 'Checking system tools...'
-                sh 'python3 --version || python --version || echo "Python verified"'
-                sh 'docker --version || echo "Docker verified"'
+                echo 'Verifying system binaries...'
+                bat 'python --version'
+                bat 'docker --version'
             }
         }
 
-        stage('Setup') {
+        stage('Setup Dependencies') {
             steps {
-                echo 'Installing dependencies...'
-                sh 'python3 -m pip install -r requirements.txt || pip install -r requirements.txt || echo "Dependencies ready"'
+                echo 'Installing Python dependencies...'
+                bat 'pip install -r requirements.txt'
             }
         }
 
-        stage('Test') {
+        stage('Run Unit Tests') {
             steps {
                 echo 'Running automated tests for Flask application...'
-                sh 'python3 -c "import app; print(\'Flask app validation successful!\')" || python -c "import app; print(\'Flask app validation successful!\')" || echo "Test passed"'
+                bat 'python -c "import app; print(\'Flask app validation successful!\')"'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker container image...'
-                sh "docker build -t ${DOCKER_HUB_REPO}:${IMAGE_TAG} ."
+                bat "docker build -t %DOCKER_HUB_REPO%:%IMAGE_TAG% ."
             }
         }
 
-        stage('Login to Docker Hub') {
+        stage('Registry Authentication & Push') {
             steps {
-                echo 'Logging into Docker Hub...'
+                echo 'Logging into Docker Hub and pushing image...'
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'docker login -u $DOCKER_USER -p $DOCKER_PASS'
+                    bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS%'
+                    bat "docker push %DOCKER_HUB_REPO%:%IMAGE_TAG%"
                 }
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Deploy to Minikube') {
             steps {
-                echo 'Pushing image to Docker Hub...'
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh "docker push ${DOCKER_HUB_REPO}:${IMAGE_TAG}"
-                }
-            }
-        }
-
-        stage('Post Actions') {
-            steps {
-                echo 'Deployment stage completed successfully.'
-                sh 'echo "Pipeline fully executed!"'
+                echo 'Updating Minikube cluster deployment...'
+                bat "minikube image load %DOCKER_HUB_REPO%:%IMAGE_TAG%"
+                bat 'kubectl apply -f deployment.yaml'
+                bat 'kubectl apply -f service.yaml'
             }
         }
     }
