@@ -15,6 +15,6 @@ spec:
       containers:
       - name: flask-app
         image: ubaidqureshi92/flask-devops-app:v6
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: always
         ports:
         - containerPort: 5000
