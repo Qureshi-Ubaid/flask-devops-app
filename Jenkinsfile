@@ -74,6 +74,7 @@ pipeline {
                 bat '''
                     set PATH=C:\\Windows\\System32;C:\\Users\\Dell\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%
                     set KUBECONFIG=C:\\Users\\Dell\\.kube\\config
+                    set MINIKUBE_HOME=C:\\Users\\Dell
 
                     minikube image load %DOCKER_HUB_REPO%:%IMAGE_TAG%
                     kubectl apply -f deployment.yaml
