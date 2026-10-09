@@ -4,8 +4,6 @@ pipeline {
     environment {
         DOCKER_HUB_REPO = 'ubaidqureshi92/flask-devops-app'
         IMAGE_TAG = 'latest'
-        // Docker, Minikube aur Python paths inject karein
-        PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;C:\\ProgramData\\chocolatey\\bin;C:\\Users\\Dell\\AppData\\Local\\Programs\\Python\\Python314;C:\\Users\\Dell\\AppData\\Local\\Programs\\Python\\Python314\\Scripts;${env.PATH}"
     }
 
     stages {
@@ -19,29 +17,41 @@ pipeline {
         stage('Check Environment') {
             steps {
                 echo 'Verifying system binaries...'
-                bat 'python --version'
-                bat 'docker --version'
+                bat '''
+                    set PATH=C:\\Users\\Dell\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;C:\\Users\\Dell\\AppData\\Local\\Programs\\Python\\Python314;C:\\Users\\Dell\\AppData\\Local\\Programs\\Python\\Python314\\Scripts;%PATH%
+                    python --version
+                    docker --version
+                '''
             }
         }
 
         stage('Setup Dependencies') {
             steps {
                 echo 'Installing Python dependencies...'
-                bat 'pip install -r requirements.txt'
+                bat '''
+                    set PATH=C:\\Users\\Dell\\AppData\\Local\\Programs\\Python\\Python314\\Scripts;%PATH%
+                    pip install -r requirements.txt
+                '''
             }
         }
 
         stage('Run Unit Tests') {
             steps {
                 echo 'Running automated tests for Flask application...'
-                bat 'python -c "import app; print(\'Flask app validation successful!\')"'
+                bat '''
+                    set PATH=C:\\Users\\Dell\\AppData\\Local\\Programs\\Python\\Python314;%PATH%
+                    python -c "import app; print('Flask app validation successful!')"
+                '''
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker container image...'
-                bat "docker build -t %DOCKER_HUB_REPO%:%IMAGE_TAG% ."
+                bat '''
+                    set PATH=C:\\Users\\Dell\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%
+                    docker build -t %DOCKER_HUB_REPO%:%IMAGE_TAG% .
+                '''
             }
         }
 
@@ -49,8 +59,11 @@ pipeline {
             steps {
                 echo 'Logging into Docker Hub and pushing image...'
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS%'
-                    bat "docker push %DOCKER_HUB_REPO%:%IMAGE_TAG%"
+                    bat '''
+                        set PATH=C:\\Users\\Dell\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%
+                        docker login -u %DOCKER_USER% -p %DOCKER_PASS%
+                        docker push %DOCKER_HUB_REPO%:%IMAGE_TAG%
+                    '''
                 }
             }
         }
@@ -58,9 +71,12 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 echo 'Updating Minikube cluster deployment...'
-                bat "minikube image load %DOCKER_HUB_REPO%:%IMAGE_TAG%"
-                bat 'kubectl apply -f deployment.yaml'
-                bat 'kubectl apply -f service.yaml'
+                bat '''
+                    set PATH=C:\\Users\\Dell\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;C:\\ProgramData\\chocolatey\\bin;%PATH%
+                    minikube image load %DOCKER_HUB_REPO%:%IMAGE_TAG%
+                    kubectl apply -f deployment.yaml
+                    kubectl apply -f service.yaml
+                '''
             }
         }
     }
