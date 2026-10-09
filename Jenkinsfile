@@ -4,6 +4,8 @@ pipeline {
     environment {
         DOCKER_HUB_REPO = 'ubaidqureshi92/flask-devops-app'
         IMAGE_TAG = 'latest'
+        // Docker, Minikube aur Python paths inject karein
+        PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;C:\\ProgramData\\chocolatey\\bin;C:\\Users\\Dell\\AppData\\Local\\Programs\\Python\\Python314;C:\\Users\\Dell\\AppData\\Local\\Programs\\Python\\Python314\\Scripts;${env.PATH}"
     }
 
     stages {
